@@ -312,7 +312,11 @@
     <script>
         // Initialize variables at the start
         const FALLBACK_IMAGE = 'https://annotate.today/new-landing-page-design.png';
-        const PROXY_URL = 'https://proxy.annotate.today/image?url=';
+        const PROXY_URLS = [
+            'https://proxy.annotate.today/image?url=',
+            'https://annotate.today/proxy/image?url=' // fallback
+        ];
+        let currentProxyIndex = 0;
         let imageUrl;
 
         // Get URL parameter and handle initial state
@@ -796,66 +800,43 @@
             document.getElementById('modal-overlay').style.display = 'none';
         });
 
-        // Improve image loading function with better sizing logic
+        // Update loadImage function to handle proxy failures
         function loadImage(url) {
             if (!url) {
                 loadImage(FALLBACK_IMAGE);
                 return;
             }
             
-            // Hide canvas container and show loading
             document.getElementById('canvas-container').style.display = 'none';
             loading.style.display = 'block';
             
-            // Use proxy URL for non-fallback images
-            const proxiedUrl = url === FALLBACK_IMAGE ? url : PROXY_URL + encodeURIComponent(url);
-            img.src = proxiedUrl;
-            
-            img.onload = function() {
-                // Calculate dimensions to fit window
-                const windowWidth = window.innerWidth - 40;
-                const windowHeight = window.innerHeight - 100;
+            const tryLoadImage = (retryCount = 0) => {
+                const proxiedUrl = url === FALLBACK_IMAGE ? 
+                    url : 
+                    PROXY_URLS[currentProxyIndex] + encodeURIComponent(url);
                 
-                let targetWidth = img.width;
-                let targetHeight = img.height;
-                
-                // If image is smaller than window width, scale up to fit
-                if (img.width < windowWidth) {
-                    const scale = windowWidth / img.width;
-                    targetWidth = windowWidth;
-                    targetHeight = img.height * scale;
-                } else {
-                    // Scale down if larger than window
-                    const scale = windowWidth / img.width;
-                    targetWidth = windowWidth;
-                    targetHeight = img.height * scale;
-                }
-                
-                // Set canvas size
-                canvas.setWidth(targetWidth);
-                canvas.setHeight(targetHeight);
-                
-                // Center canvas container
-                const canvasContainer = document.getElementById('canvas-container');
-                canvasContainer.style.justifyContent = 'center';
-                
-                // Create and set background image
-                fabric.Image.fromURL(proxiedUrl, function(fabricImg) {
-                    // Scale image to fit canvas
-                    const scaleX = targetWidth / img.width;
-                    const scaleY = targetHeight / img.height;
-                    fabricImg.scale(Math.min(scaleX, scaleY));
+                img.onerror = function(error) {
+                    console.error('Image load error:', error);
                     
-                    canvas.setBackgroundImage(fabricImg, function() {
-                        canvas.renderAll();
-                        // Show canvas container and hide loading
-                        canvasContainer.style.display = 'flex';
-                        loading.style.display = 'none';
-                        showUIElements();
-                        setCommentCursor();
-                    });
-                }, { crossOrigin: 'anonymous' });
+                    // Try next proxy URL
+                    currentProxyIndex = (currentProxyIndex + 1) % PROXY_URLS.length;
+                    
+                    if (retryCount < PROXY_URLS.length) {
+                        console.log('Retrying with next proxy...');
+                        tryLoadImage(retryCount + 1);
+                    } else {
+                        console.error('All proxies failed');
+                        showModal('error');
+                        if (url !== FALLBACK_IMAGE) {
+                            loadImage(FALLBACK_IMAGE);
+                        }
+                    }
+                };
+                
+                img.src = proxiedUrl;
             };
+            
+            tryLoadImage();
         }
 
         // Initial image load
@@ -880,7 +861,7 @@
                     }));
                     
                     // Get original URL from backgroundImage
-                    const originalUrl = currentBg.getSrc().replace(PROXY_URL, '');
+                    const originalUrl = currentBg.getSrc().replace(PROXY_URLS[currentProxyIndex], '');
                     loadImage(originalUrl);
                     
                     // Restore annotations with adjusted positions
