@@ -313,8 +313,8 @@
         // Initialize variables at the start
         const FALLBACK_IMAGE = 'https://annotate.today/new-landing-page-design.png';
         const PROXY_URLS = [
-            'https://proxy.annotate.today/image?url=',
-            'https://annotate.today/proxy/image?url=' // fallback
+            'https://annotate.today/api/proxy?url=',  // main domain
+            'https://api.annotate.today/proxy?url='   // subdomain fallback
         ];
         let currentProxyIndex = 0;
         let imageUrl;

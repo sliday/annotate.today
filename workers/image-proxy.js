@@ -32,7 +32,9 @@ async function handleRequest(request) {
 
   // Get and validate the target URL
   const url = new URL(request.url)
-  const imageUrl = url.searchParams.get('url')
+  const imageUrl = url.pathname.startsWith('/api/proxy') ? 
+    url.searchParams.get('url') : 
+    url.searchParams.get('url')
   
   if (!imageUrl) {
     return new Response('Missing URL parameter', { 
