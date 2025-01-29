@@ -312,6 +312,7 @@
     <script>
         // Initialize variables at the start
         const FALLBACK_IMAGE = 'https://annotate.today/new-landing-page-design.png';
+        const PROXY_URL = 'https://proxy.annotate.today/image?url=';
         let imageUrl;
 
         // Get URL parameter and handle initial state
@@ -806,7 +807,10 @@
             document.getElementById('canvas-container').style.display = 'none';
             loading.style.display = 'block';
             
-            img.src = url;
+            // Use proxy URL for non-fallback images
+            const proxiedUrl = url === FALLBACK_IMAGE ? url : PROXY_URL + encodeURIComponent(url);
+            img.src = proxiedUrl;
+            
             img.onload = function() {
                 // Calculate dimensions to fit window
                 const windowWidth = window.innerWidth - 40;
@@ -836,7 +840,7 @@
                 canvasContainer.style.justifyContent = 'center';
                 
                 // Create and set background image
-                fabric.Image.fromURL(url, function(fabricImg) {
+                fabric.Image.fromURL(proxiedUrl, function(fabricImg) {
                     // Scale image to fit canvas
                     const scaleX = targetWidth / img.width;
                     const scaleY = targetHeight / img.height;
@@ -866,10 +870,8 @@
         window.addEventListener('resize', function() {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(function() {
-                // Get current background image
                 const currentBg = canvas.backgroundImage;
                 if (currentBg) {
-                    // Store current annotations
                     const objects = canvas.getObjects();
                     const objectsData = objects.map(obj => ({
                         left: obj.left / canvas.width,
@@ -877,8 +879,9 @@
                         data: obj.toObject()
                     }));
                     
-                    // Reload image with new dimensions
-                    loadImage(currentBg.getSrc());
+                    // Get original URL from backgroundImage
+                    const originalUrl = currentBg.getSrc().replace(PROXY_URL, '');
+                    loadImage(originalUrl);
                     
                     // Restore annotations with adjusted positions
                     objectsData.forEach(obj => {
