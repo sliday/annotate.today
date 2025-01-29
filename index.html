@@ -177,9 +177,9 @@
             transform: translate(-50%, -50%);
             text-align: center;
             background: white;
-            padding: 24px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 20px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             z-index: 100;
         }
 
@@ -204,10 +204,56 @@
             display: none;
         }
 
-        /* Add code style */
-        code {
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 
-                        "Liberation Mono", "Courier New", monospace;
+        /* Add modal styles after other styles */
+        .edu-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .edu-modal h2 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .edu-modal ul {
+            text-align: left;
+            margin: 16px 0;
+            padding-left: 24px;
+            color: #666;
+        }
+
+        .edu-modal li {
+            margin: 8px 0;
+        }
+
+        .edu-modal .close-btn {
+            background: #2196F3;
+            color: white;
+            padding: 8px 24px;
+            border-radius: 4px;
+            margin-top: 16px;
+            font-size: 14px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
         }
     </style>
 </head>
@@ -227,24 +273,14 @@
 
     <div id="loading" class="center-message">
         <div class="loading-spinner"></div>
-        <div style="margin-top: 8px;">Loading your image...</div>
+        Loading image...
     </div>
 
     <div id="error-message" class="center-message" style="display: none;">
-        <div style="text-align: left; max-width: 400px;">
-            <h2 style="margin-bottom: 16px; font-size: 16px;">Welcome to annotate.today!</h2>
-            <p style="margin-bottom: 12px; color: #666;">
-                Add annotations to any image in 3 simple steps:
-            </p>
-            <ol style="margin-bottom: 16px; color: #666; padding-left: 20px;">
-                <li>Add <code style="background: #f5f5f5; padding: 2px 4px; border-radius: 3px;">?url=YOUR_IMAGE_URL</code> to the address</li>
-                <li>Double-click anywhere to add annotations</li>
-                <li>Click Download to save</li>
-            </ol>
-            <button onclick="closeMessage()" class="tool-button visible" style="background: #666;">
-                Got it
-            </button>
-        </div>
+        <p style="margin-bottom: 10px;"></p>
+        <button onclick="window.location.href=''" class="tool-button visible" style="background: #666;">
+            Try Again
+        </button>
     </div>
 
     <div id="image-container">
@@ -258,16 +294,30 @@
             href="https://karmabot.chat" class="link" target="_blank">Karma</a>
     </footer>
 
+    <!-- Add modal HTML before the closing body tag -->
+    <div id="modal-overlay" class="modal-overlay" style="display: none;"></div>
+    <div id="edu-modal" class="edu-modal" style="display: none;">
+        <h2 id="modal-title">Welcome to annotate.today!</h2>
+        <div id="modal-content">
+            <ul>
+                <li>Use annotate.today/?url=YOUR_IMAGE_URL</li>
+                <li>Double-click anywhere to add annotations</li>
+                <li>Download and share</li>
+            </ul>
+        </div>
+        <button class="close-btn" id="modal-close">Close</button>
+    </div>
+
     <script>
-        // Get URL parameter and validate with better encoding handling
+        // Initialize variables at the start
+        const FALLBACK_IMAGE = 'https://annotate.today/new-landing-page-design.png';
+        let imageUrl;
+
+        // Get URL parameter and handle initial state
         const rawUrl = new URLSearchParams(window.location.search).get('url');
-        // Default landing page image
-        const defaultImage = 'https://annotate.today/new-landing-page-design.png';
-        
-        // Properly encode URL, handling special characters better
-        const imageUrl = rawUrl ? 
-            encodeURIComponent(decodeURIComponent(rawUrl)) : 
-            defaultImage;
+        if (rawUrl) {
+            imageUrl = encodeURI(decodeURI(rawUrl));
+        }
 
         const loading = document.getElementById('loading');
         const errorMessage = document.getElementById('error-message');
@@ -277,60 +327,25 @@
         // Move footer inside body
         document.body.appendChild(footer);
 
-        function showWelcomeOrError(isError = false) {
+        function showError(message) {
             loading.style.display = 'none';
+            errorMessage.querySelector('p').textContent = message;
             errorMessage.style.display = 'block';
-            
-            if (isError) {
-                errorMessage.querySelector('p').innerHTML = `
-                    Unable to load the image: ${rawUrl ? (rawUrl.length > 50 ? rawUrl.substring(0, 50) + '...' : rawUrl) : 'no url provided'}. Make sure that YOUR_IMG_URL is correct and the image is accessible.
-                `;
-                errorMessage.querySelector('button').textContent = 'Close';
-                errorMessage.querySelector('button').onclick = closeMessage;
-            } else {
-                errorMessage.innerHTML = `
-                    <div style="text-align: left; max-width: 400px;">
-                        <h2 style="margin-bottom: 16px; font-size: 16px;">Welcome to annotate.today!</h2>
-                        <p>
-                            Add annotations to any image in 3 simple steps:
-                        </p>
-                        <ol>
-                            <li>Use annotate.today/<code style="background: #f5f5f5; padding: 2px 4px; border-radius: 3px;">?url=YOUR_IMAGE_URL</code></li>
-                            <li>Double-click anywhere to add annotations</li>
-                            <li>Click Download to save</li>
-                        </ol>
-                        <button onclick="closeMessage()" class="tool-button visible" style="background: #666;">
-                            Got it
-                        </button>
-                    </div>
-                `;
-            }
         }
 
-        function closeMessage() {
-            errorMessage.style.display = 'none';
-        }
+        // Initialize fabric canvas
+        const canvas = new fabric.Canvas('canvas');
+        const img = new Image();
 
-        // Initialize fabric canvas properly
-        let canvas;
-        try {
-            canvas = new fabric.Canvas('canvas', {
-                selection: false,
-                preserveObjectStacking: true
-            });
-            
-            // Set canvas element's crossOrigin
-            canvas.getElement().crossOrigin = "anonymous";
-        } catch (error) {
-            console.error('Canvas initialization error:', error);
-            showWelcomeOrError(true);
-            throw error;
-        }
+        // Improve error handling
+        img.onerror = function(error) {
+            console.error('Image load error:', error);
+            showModal('error');
+            // Load fallback image when original image fails
+            loadImage(FALLBACK_IMAGE);
+        };
 
         // Pre-load image to get dimensions
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        
         img.onload = function() {
             console.log('Initial image loaded:', {
                 width: img.width,
@@ -363,7 +378,7 @@
                     console.log('Fabric image created:', fabricImg ? 'success' : 'failed');
                     
                     if (!fabricImg) {
-                        showWelcomeOrError(true);
+                        showError('Failed to process image. Please try again.');
                         return;
                     }
 
@@ -399,7 +414,7 @@
                         console.error('Error in final setup:', error);
                         // Don't show error if the app is still usable
                         if (!canvas || !canvas.backgroundImage) {
-                            showWelcomeOrError(true);
+                            showError('Failed to prepare image. Please try again.');
                         }
                     }
                 }, { 
@@ -409,7 +424,7 @@
                         console.error('Fabric image load error');
                         // Don't show error if the app is still usable
                         if (!canvas || !canvas.backgroundImage) {
-                            showWelcomeOrError(true);
+                            showError('Failed to load image properly. Please try again.');
                         }
                     }
                 });
@@ -418,19 +433,10 @@
                 console.error('Error in canvas setup:', error);
                 // Don't show error if the app is still usable
                 if (!canvas || !canvas.getElement()) {
-                    showWelcomeOrError(true);
+                    showError('Failed to prepare canvas. Please try again.');
                 }
             }
         };
-
-        img.onerror = function(error) {
-            console.error('Image load error:', error);
-            showWelcomeOrError(true);
-        };
-
-        // Start loading the image
-        console.log('Starting image load:', imageUrl);
-        img.src = imageUrl;
 
         // Debug function
         function logAction(action, details = {}) {
@@ -711,8 +717,8 @@
         headroom.init();
 
         // Add styles for headroom transitions
-        const style = document.createElement('style');
-        style.textContent = `
+        const dynamicStyles = document.createElement('style');
+        dynamicStyles.textContent = `
             .headroom {
                 transition: transform 200ms linear;
             }
@@ -722,17 +728,28 @@
             .headroom--unpinned {
                 transform: translateY(-100%);
             }
+
+            #canvas-container {
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                min-height: calc(100vh - 48px);
+                padding: 20px;
+                box-sizing: border-box;
+            }
+            
+            #canvas {
+                max-width: 100%;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
         `;
-        document.head.appendChild(style);
+        document.head.appendChild(dynamicStyles);
 
         // Function to show UI elements
         function showUIElements() {
-            if (loading) loading.style.display = 'none';
-            if (instructions) instructions.style.display = 'flex';
-            if (footer) {
-                footer.style.display = 'block';
-                console.log('Footer displayed');
-            }
+            loading.style.display = 'none';
+            instructions.style.display = 'flex';
+            footer.style.display = 'block';
         }
 
         // Add error handling that doesn't block the UI
@@ -742,6 +759,134 @@
             if (canvas && canvas.backgroundImage) {
                 showUIElements();
             }
+        });
+
+        // Update the error handling and modal logic
+        function showModal(type) {
+            const modal = document.getElementById('edu-modal');
+            const modalContent = document.getElementById('modal-content');
+            const overlay = document.getElementById('modal-overlay');
+            
+            if (type === 'error') {
+                modalContent.innerHTML = `
+                    <h3>Unable to load the image</h3>
+                    <p>Make sure that YOUR_IMG_URL is correct and the image is accessible.</p>
+                    <ul>
+                        <li>Use annotate.today/?url=YOUR_IMAGE_URL</li>
+                        <li>Double-click anywhere to add annotations</li>
+                        <li>Download and share</li>
+                    </ul>
+                `;
+            } else if (type === 'welcome') {
+                modalContent.innerHTML = `
+                    <h3>Welcome to annotate.today!</h3>
+                    <p>Use annotate.today/?url=YOUR_IMAGE_URL</p>
+                    <p>Double-click anywhere to add annotations</p>
+                    <p>Download and share</p>
+                `;
+            }
+            
+            modal.style.display = 'block';
+            overlay.style.display = 'block';
+        }
+
+        document.getElementById('modal-close').addEventListener('click', function() {
+            document.getElementById('edu-modal').style.display = 'none';
+            document.getElementById('modal-overlay').style.display = 'none';
+        });
+
+        // Improve image loading function with better sizing logic
+        function loadImage(url) {
+            if (!url) {
+                loadImage(FALLBACK_IMAGE);
+                return;
+            }
+            
+            img.src = url;
+            img.onload = function() {
+                // Calculate dimensions to fit window
+                const windowWidth = window.innerWidth - 40; // 40px padding
+                const windowHeight = window.innerHeight - 100; // Account for header and some padding
+                
+                let targetWidth = img.width;
+                let targetHeight = img.height;
+                
+                // If image is smaller than window width, scale up to fit
+                if (img.width < windowWidth) {
+                    const scale = windowWidth / img.width;
+                    targetWidth = windowWidth;
+                    targetHeight = img.height * scale;
+                } else {
+                    // Scale down if larger than window
+                    const scale = windowWidth / img.width;
+                    targetWidth = windowWidth;
+                    targetHeight = img.height * scale;
+                }
+                
+                // Set canvas size
+                canvas.setWidth(targetWidth);
+                canvas.setHeight(targetHeight);
+                
+                // Center canvas container
+                const canvasContainer = document.getElementById('canvas-container');
+                canvasContainer.style.display = 'flex';
+                canvasContainer.style.justifyContent = 'center';
+                
+                // Create and set background image
+                fabric.Image.fromURL(url, function(fabricImg) {
+                    // Scale image to fit canvas
+                    const scaleX = targetWidth / img.width;
+                    const scaleY = targetHeight / img.height;
+                    fabricImg.scale(Math.min(scaleX, scaleY));
+                    
+                    canvas.setBackgroundImage(fabricImg, function() {
+                        canvas.renderAll();
+                        showUIElements();
+                        setCommentCursor();
+                    });
+                }, { crossOrigin: 'anonymous' });
+            };
+        }
+
+        // Initial image load
+        if (imageUrl) {
+            loadImage(imageUrl);
+        } else {
+            loadImage(FALLBACK_IMAGE);
+        }
+
+        // Add proper resize handling
+        let resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function() {
+                // Get current background image
+                const currentBg = canvas.backgroundImage;
+                if (currentBg) {
+                    // Store current annotations
+                    const objects = canvas.getObjects();
+                    const objectsData = objects.map(obj => ({
+                        left: obj.left / canvas.width,
+                        top: obj.top / canvas.height,
+                        data: obj.toObject()
+                    }));
+                    
+                    // Reload image with new dimensions
+                    loadImage(currentBg.getSrc());
+                    
+                    // Restore annotations with adjusted positions
+                    objectsData.forEach(obj => {
+                        fabric.util.enlivenObjects([obj.data], function(enlivenedObjects) {
+                            const newObj = enlivenedObjects[0];
+                            newObj.set({
+                                left: obj.left * canvas.width,
+                                top: obj.top * canvas.height
+                            });
+                            canvas.add(newObj);
+                        });
+                    });
+                }
+            }, 250); // Debounce resize events
         });
     </script>
 </body>
