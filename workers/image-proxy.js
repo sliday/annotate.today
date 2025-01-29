@@ -32,7 +32,7 @@ async function handleRequest(request) {
 
   // Get and validate the target URL
   const url = new URL(request.url)
-  const imageUrl = url.pathname.startsWith('/api/proxy') ? 
+  const imageUrl = url.pathname.startsWith('/proxy') ? 
     url.searchParams.get('url') : 
     url.searchParams.get('url')
   

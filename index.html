@@ -313,7 +313,7 @@
         // Initialize variables at the start
         const FALLBACK_IMAGE = 'https://annotate.today/new-landing-page-design.png';
         const PROXY_URLS = [
-            'https://annotate.today/api/proxy?url=',  // main domain
+            'https://annotate.today/proxy?url=',      // main domain
             'https://api.annotate.today/proxy?url='   // subdomain fallback
         ];
         let currentProxyIndex = 0;
@@ -815,6 +815,8 @@
                     url : 
                     PROXY_URLS[currentProxyIndex] + encodeURIComponent(url);
                 
+                console.log('Trying to load image with proxy:', proxiedUrl);
+                
                 img.onerror = function(error) {
                     console.error('Image load error:', error);
                     
@@ -827,10 +829,40 @@
                     } else {
                         console.error('All proxies failed');
                         showModal('error');
+                        loading.style.display = 'none';
                         if (url !== FALLBACK_IMAGE) {
                             loadImage(FALLBACK_IMAGE);
                         }
                     }
+                };
+                
+                img.onload = function() {
+                    const windowWidth = window.innerWidth - 40;
+                    const windowHeight = window.innerHeight - 100;
+                    
+                    let targetWidth = img.width;
+                    let targetHeight = img.height;
+                    
+                    // Scale image to fit window
+                    const scale = windowWidth / img.width;
+                    targetWidth = windowWidth;
+                    targetHeight = img.height * scale;
+                    
+                    // Set canvas size
+                    canvas.setWidth(targetWidth);
+                    canvas.setHeight(targetHeight);
+                    
+                    // Create fabric image
+                    fabric.Image.fromURL(proxiedUrl, function(fabricImg) {
+                        fabricImg.scale(scale);
+                        canvas.setBackgroundImage(fabricImg, function() {
+                            canvas.renderAll();
+                            document.getElementById('canvas-container').style.display = 'flex';
+                            loading.style.display = 'none';
+                            showUIElements();
+                            setCommentCursor();
+                        });
+                    }, { crossOrigin: 'anonymous' });
                 };
                 
                 img.src = proxiedUrl;
