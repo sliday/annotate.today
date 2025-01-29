@@ -256,6 +256,37 @@
             background: rgba(0,0,0,0.5);
             z-index: 999;
         }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            #header {
+                padding: 0 12px;
+                height: 40px;  /* Slightly smaller header on mobile */
+            }
+
+            #site-url {
+                display: none;  /* Hide URL on mobile to save space */
+            }
+
+            #instructions {
+                flex: 1;
+                font-size: 11px;
+                gap: 12px;
+            }
+
+            .instruction-step {
+                display: none;  /* Hide step numbers on mobile */
+            }
+
+            #download-container {
+                min-width: auto;
+            }
+
+            .tool-button {
+                padding: 4px 10px;
+                font-size: 12px;
+            }
+        }
     </style>
 </head>
 
@@ -916,6 +947,87 @@
                     canvas.renderAll();
                 }
             }, 250); // Debounce resize events
+        });
+
+        // Handle touch events for mobile
+        let lastTap = 0;
+        let touchTimer = null;
+        
+        canvas.on('touch:longpress', function(options) {
+            // Prevent default behavior
+            options.e.preventDefault();
+            handleDoubleTapOrLongPress(options);
+        });
+        
+        canvas.on('touch:tap', function(options) {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTap;
+            
+            // Clear any existing touch timer
+            if (touchTimer) {
+                clearTimeout(touchTimer);
+            }
+            
+            if (tapLength < 500 && tapLength > 0) {
+                // Double tap detected
+                handleDoubleTapOrLongPress(options);
+                lastTap = 0;
+            } else {
+                // Set timer for potential second tap
+                lastTap = currentTime;
+            }
+        });
+        
+        function handleDoubleTapOrLongPress(options) {
+            const pointer = canvas.getPointer(options.e);
+            
+            // Create comment at touch point
+            const comment = new fabric.Textbox('Add comment here...', {
+                left: pointer.x,
+                top: pointer.y,
+                width: 200,
+                fontSize: 14,
+                fill: '#000000',
+                backgroundColor: '#FFEB3B',
+                padding: 10,
+                cornerStyle: 'circle',
+                cornerColor: '#666',
+                cornerSize: 6,
+                transparentCorners: false,
+                lockScalingX: false,
+                lockScalingY: true,
+                hasControls: true,
+                editingBorderColor: '#666',
+                borderColor: '#666',
+                borderOpacityWhenMoving: 1,
+                selectable: true,
+                fontFamily: 'Arial',
+                hoverCursor: 'move',
+            });
+            
+            canvas.add(comment);
+            canvas.setActiveObject(comment);
+            comment.enterEditing();
+            comment.selectAll();
+            
+            // Show toolbar when first comment is added
+            updateToolbarVisibility();
+        }
+        
+        // Update canvas options for better touch handling
+        canvas.set({
+            allowTouchScrolling: true,
+            stopContextMenu: true,
+            fireRightClick: true
+        });
+        
+        // Prevent page zoom on double tap
+        document.addEventListener('touchend', function(e) {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTap;
+            if (tapLength < 500 && tapLength > 0) {
+                e.preventDefault();
+            }
         });
     </script>
 </body>
