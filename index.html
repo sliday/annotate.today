@@ -44,6 +44,7 @@
             position: relative;
             width: 100%;
             z-index: 1;
+            display: none;
         }
 
         /* Update header styles */
@@ -747,7 +748,6 @@
 
         // Function to show UI elements
         function showUIElements() {
-            loading.style.display = 'none';
             instructions.style.display = 'flex';
             footer.style.display = 'block';
         }
@@ -802,11 +802,15 @@
                 return;
             }
             
+            // Hide canvas container and show loading
+            document.getElementById('canvas-container').style.display = 'none';
+            loading.style.display = 'block';
+            
             img.src = url;
             img.onload = function() {
                 // Calculate dimensions to fit window
-                const windowWidth = window.innerWidth - 40; // 40px padding
-                const windowHeight = window.innerHeight - 100; // Account for header and some padding
+                const windowWidth = window.innerWidth - 40;
+                const windowHeight = window.innerHeight - 100;
                 
                 let targetWidth = img.width;
                 let targetHeight = img.height;
@@ -829,7 +833,6 @@
                 
                 // Center canvas container
                 const canvasContainer = document.getElementById('canvas-container');
-                canvasContainer.style.display = 'flex';
                 canvasContainer.style.justifyContent = 'center';
                 
                 // Create and set background image
@@ -841,6 +844,9 @@
                     
                     canvas.setBackgroundImage(fabricImg, function() {
                         canvas.renderAll();
+                        // Show canvas container and hide loading
+                        canvasContainer.style.display = 'flex';
+                        loading.style.display = 'none';
                         showUIElements();
                         setCommentCursor();
                     });
