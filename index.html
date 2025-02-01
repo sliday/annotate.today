@@ -325,6 +325,10 @@
                             showUIElements();
                             setCommentCursor();
                             updateToolbarVisibility();
+                            // Update the header input with the current image URL
+                            const siteUrlInput = document.getElementById('site-url-input');
+                            // Show the original URL, not the proxied one
+                            siteUrlInput.value = url === FALLBACK_IMAGE ? '' : url;
                         });
                     }, { crossOrigin: 'anonymous' });
                 };
