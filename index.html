@@ -714,6 +714,7 @@
             // Selecting both download buttons: mobile and header
             const downloadButtonToolbar = document.querySelector('.compact-toolbar #download-btn');
             const downloadButtonHeader = document.getElementById('save-tool');
+            const howItWorksBtn = document.getElementById('how-it-works-btn');
             // Only count textboxes as annotations
             const annotations = canvas.getObjects().filter(obj => obj.type === 'textbox');
             const hasAnnotations = annotations.length > 0;
@@ -722,18 +723,14 @@
                 // If annotations exist then show Download buttons and hide "How it works"
                 downloadButtonToolbar.style.display = 'flex';
                 downloadButtonHeader.style.display = 'inline-block';
-                document.getElementById('how-it-works-btn').style.display = 'none';
+                howItWorksBtn.style.display = 'none';
                 setTimeout(() => {
                     downloadButtonToolbar.style.opacity = '1';
                     downloadButtonHeader.style.opacity = '1';
                 }, 0);
             } else {
-                // No annotations – if we are with fallback image, show "How it works"
-                if (imageUrl === FALLBACK_IMAGE) {
-                    document.getElementById('how-it-works-btn').style.display = 'inline-block';
-                } else {
-                    document.getElementById('how-it-works-btn').style.display = 'none';
-                }
+                // No annotations – show "How it works" and hide download buttons
+                howItWorksBtn.style.display = 'inline-block';
                 // Hide download buttons
                 downloadButtonToolbar.style.opacity = '0';
                 downloadButtonHeader.style.opacity = '0';
@@ -806,15 +803,38 @@
 
         // Listen for the Delete (or Backspace) key to remove selected annotation
         document.addEventListener('keydown', function(e) {
+            // Handle both Delete and Backspace keys
             if (e.key === 'Delete' || e.key === 'Backspace') {
                 const activeObj = canvas.getActiveObject();
-                if (activeObj && activeObj.type === 'textbox') {
+                // Debug logging
+                console.log('Delete/Backspace pressed:', {
+                    hasActiveObject: !!activeObj,
+                    type: activeObj?.type,
+                    isEditing: activeObj?.isEditing,
+                    text: activeObj?.text,
+                    selected: activeObj?.selected,
+                    active: canvas.getActiveObjects().length > 0
+                });
+
+                // Check if we have a selected textbox that's not being edited
+                if (activeObj && activeObj.type === 'textbox' && !activeObj.isEditing) {
+                    console.log('Deleting textbox:', activeObj);
+                    // Remove the object from canvas
                     canvas.remove(activeObj);
                     canvas.discardActiveObject();
                     canvas.requestRenderAll();
                     updateToolbarVisibility();
                 }
             }
+        });
+
+        // Enable built-in keyboard events for Fabric
+        canvas.set({
+            enableRetinaScaling: true,
+            stopContextMenu: true,
+            fireRightClick: true,
+            enablePointerEvents: true,
+            enableKeyEvents: true  // This enables keyboard events on selected objects
         });
 
         // Set up "How it works" button event listeners after DOM is fully loaded
