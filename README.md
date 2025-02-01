@@ -12,17 +12,4 @@ A lightweight, serverless tool for adding annotations to images. Just add your i
 
 Example:
 
-https://annotate.today/?url=YOUR_IMAGE_URL
-
-## CORS Requirements
-
-This tool needs to load images from external sources. To save annotated images:
-
-1. The image source must allow CORS access (have proper Access-Control-Allow-Origin headers)
-2. Use images from the same domain as the tool
-3. Or use a CORS proxy service
-
-Example of CORS-friendly image hosts:
-- imgur.com
-- cloudinary.com
-- Your own server with proper CORS headers
+https://annotate.today/?url=https://annotate.today/rickroll/5.jpg
