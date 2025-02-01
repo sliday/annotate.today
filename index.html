@@ -4,6 +4,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    
+    <meta name="description" content="Annotate.today is an interactive image annotation tool that lets you upload images via URL, add text annotations, and download your edited creations seamlessly.">
+    <meta name="keywords" content="annotate.today, image annotation, fabric.js, online image editor, annotations, image editing, mobile-friendly">
+    <meta name="author" content="Stas Kulesh">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ffffff">
+    
+    <meta property="og:title" content="annotate.today - Image Annotation Tool">
+    <meta property="og:description" content="Annotate.today is a versatile tool for adding text annotations to your images. Enhance, download, and share your annotated images with ease.">
+    <meta property="og:image" content="https://annotate.today/default-image.jpg">
+    <meta property="og:url" content="https://annotate.today">
+    <meta property="og:site_name" content="annotate.today">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@stas_kulesh">
+    <meta name="twitter:title" content="annotate.today - Free Image Annotation Tool">
+    <meta name="twitter:description" content="Annotate your images effortlessly with annotate.today. Add text annotations, download, and share images with a responsive design tailored for all devices.">
+    <meta name="twitter:image" content="https://annotate.today/default-image.jpg">
+
     <title>annotate.today - Image Annotation Tool</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
     <script src="https://unpkg.com/headroom.js"></script>
@@ -87,7 +106,7 @@
         console.log('Media query matches:', window.matchMedia('(max-width: 640px), (max-device-width: 926px)').matches);
 
         // Initialize variables at the start
-        const FALLBACK_IMAGE = `http://annotate.today/rickroll/${Math.floor(Math.random() * (183 - 2 + 1)) + 2}.jpg`;
+        const FALLBACK_IMAGE = `https://annotate.today/rickroll/${Math.floor(Math.random() * (183 - 2 + 1)) + 2}.jpg`;
         const PROXY_URLS = [
             'https://annotate.today/proxy?url=',  // main domain
         ];
