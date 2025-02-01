@@ -1,0 +1,566 @@
+/* Modern CSS Reset */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 
+                "Liberation Mono", "Courier New", monospace;
+    line-height: 1.4;
+    color: #333;
+    background: #f5f5f5;    
+}
+
+button {
+    font: inherit;
+    border: none;
+    cursor: pointer;
+}
+
+/* Layout */
+#image-container {
+    max-width: 100%;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    padding-top: 48px; /* Same as header height */
+}
+
+#canvas-container {
+    position: relative;
+    width: 100%;
+    z-index: 1;
+    display: none;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: calc(100vh - 48px);
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#canvas {
+    max-width: 100%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Header */
+#header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 48px;
+    background: white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 1003;  /* Above canvas controls and toolbar */
+    font-size: 13px;
+}
+
+#site-url {
+    flex: 1;
+    min-width: 100px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+#site-url span {
+    color: #666;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+#site-url input {
+    font-size: 13px;
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #f5f5f5;
+    color: #333;
+    width: 800px;
+    max-width: 100%;
+    outline: none;
+}
+
+#site-url input:focus {
+    border-color: #2196F3;
+}
+
+#instructions {
+    flex: 2;
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    align-items: center;
+    color: #666;
+    font-size: 12px;
+    position: static;
+    transform: none;
+    background: none;
+    padding: 0;
+    box-shadow: none;
+    transition: opacity 0.3s ease;
+    opacity: 0;
+    display: none;
+}
+
+.instruction-step {
+    color: #2196F3;
+    font-weight: 500;
+    margin-right: 2px;
+}
+
+#download-container {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    min-width: 100px;
+}
+
+/* Buttons */
+.tool-button {
+    background: #2196F3;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+}
+
+.tool-button.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Tooltip */
+.cursor-tooltip {
+    position: fixed;
+    background: rgba(33, 33, 33, 0.9);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    pointer-events: none;
+    z-index: 1005;  /* Above everything */
+    transform: translate(15px, 15px);
+    transition: opacity 0.2s ease;
+}
+
+/* Comments */
+.comment-box {
+    background: #FFF176;
+    padding: 12px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    font-size: 14px;
+    font-family: inherit;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    margin: 16px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    font-size: 13px;
+    display: none;
+}
+
+footer:hover {
+    opacity: 0.7 !important;
+}
+
+footer .link {
+    color: inherit;
+    text-decoration: underline;
+}
+
+/* Messages */
+.center-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    background: white;
+    padding: 20px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 100;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #2196F3;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Modal */
+.edu-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1004;  /* Above everything */
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+}
+
+.edu-modal h2 {
+    font-size: 20px;
+    margin-bottom: 16px;
+    color: #333;
+}
+
+.edu-modal ul {
+    text-align: left;
+    margin: 16px 0;
+    padding-left: 24px;
+    color: #666;
+}
+
+.edu-modal li {
+    margin: 8px 0;
+}
+
+.edu-modal .close-btn {
+    background: #2196F3;
+    color: white;
+    padding: 8px 24px;
+    border-radius: 4px;
+    margin-top: 16px;
+    font-size: 14px;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1003;  /* Same as header */
+}
+
+/* Headroom */
+.headroom {
+    transition: transform 200ms linear;
+}
+
+.headroom--pinned {
+    transform: translateY(0%);
+}
+
+.headroom--unpinned {
+    transform: translateY(-100%);
+}
+
+/* Small screen optimizations */
+@media (max-width: 932px), (hover: none) and (pointer: coarse) {  /* Target mobile devices more reliably */
+    /* Hide header on mobile */
+    #header {
+        display: none !important;  /* Force hide with !important */
+    }
+    
+    /* Adjust container spacing */
+    #image-container {
+        padding-top: 0;
+    }
+    
+    #canvas-container {
+        min-height: 100vh;
+        padding-bottom: 88px;  /* Space for bottom toolbar */
+    }
+}
+
+/* Compact toolbar */
+.compact-toolbar {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    box-shadow: 0 -1px 4px rgba(0,0,0,0.1);
+    padding: 16px;
+    z-index: 9999;
+    justify-content: center;
+    gap: 16px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    border-top: 1px solid rgba(0,0,0,0.1);
+    transition: opacity 0.3s ease;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.compact-toolbar button {
+    background: #2196F3;
+    color: white;
+    padding: 16px 32px;
+    border-radius: 4px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 140px;
+    justify-content: center;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    -webkit-tap-highlight-color: transparent;  /* Remove tap highlight on iOS */
+    transition: opacity 0.3s ease, transform 0.2s ease, background-color 0.2s ease;
+    position: relative;
+    z-index: 9999;
+    touch-action: manipulation;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+.compact-toolbar button#delete-btn {
+    background: #dc3545;
+    display: flex;
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.95);
+}
+
+.compact-toolbar button#download-btn {
+    background: #28a745;  /* Green color for download */
+    display: none;
+}
+
+.compact-toolbar button svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Show delete button when active */
+.compact-toolbar button#delete-btn.active {
+    transform: scale(1);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+/* Canvas controls - update this section */
+.canvas-container {
+    z-index: 1000;  /* Higher base layer */
+    pointer-events: none;
+}
+
+.canvas-container .upper-canvas {
+    z-index: 1001 !important;  /* Above base canvas */
+    pointer-events: auto;
+}
+
+/* Update other z-indices to match */
+#header {
+    z-index: 1003;
+}
+
+.modal-overlay {
+    z-index: 1003;
+}
+
+.edu-modal {
+    z-index: 1004;
+}
+
+.cursor-tooltip {
+    z-index: 1005;
+}
+
+/* Add styles for Fabric.js controls */
+.canvas-container .controls {
+    z-index: 1001 !important;
+    touch-action: none;
+    /* Improve touch targets */
+    min-width: 44px;
+    min-height: 44px;
+}
+
+.canvas-container .upper-canvas {
+    touch-action: none !important;
+    /* Prevent iOS text selection */
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Make control points more visible */
+.canvas-container .corner {
+    background-color: #2196F3 !important;
+    border: 2px solid white !important;
+    border-radius: 50% !important;
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+}
+
+.canvas-container .textbox-selected {
+    border-color: #2196F3 !important;
+    border-width: 2px !important;
+}
+
+.compact-toolbar button:active {
+    transform: scale(0.95);
+    opacity: 0.9;
+}
+
+/* Ensure delete button is properly positioned */
+.compact-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+}
+
+/* Make sure buttons don't jump around */
+.compact-toolbar button {
+    flex: 0 0 auto;
+    min-width: 120px;
+}
+
+/* Hide bottom toolbar on devices larger than mobile */
+@media (min-width: 927px) {
+  .compact-toolbar {
+    display: none !important;
+  }
+}
+
+/* Modal: Improved styling for edu-modal content */
+.edu-modal .modal-header {
+    text-align: center;
+    margin-bottom: 16px;
+}
+.edu-modal .modal-header h3 {
+    font-size: 20px;
+    margin: 0;
+}
+.edu-modal .modal-body {
+    text-align: center;
+    margin-bottom: 16px;
+}
+.edu-modal .modal-message {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 12px;
+}
+.edu-modal .modal-input {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    margin-bottom: 12px;
+}
+.edu-modal .modal-btn {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+.edu-modal .modal-btn:hover {
+    background: #1976D2;
+}
+.edu-modal .modal-footer {
+    text-align: center;
+}
+.edu-modal .modal-note {
+    font-size: 12px;
+    color: #666;
+}
+
+/* Header layout */
+#header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    height: 60px;
+    background: white;
+    border-bottom: 1px solid #eee;
+}
+
+#site-url {
+    flex: 0 0 auto;
+}
+
+#instructions {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+#download-container {
+    flex: 0 0 auto;
+}
+
+/* Download button styles */
+.tool-button.download-button {
+    visibility: visible !important; /* Override the default .tool-button visibility */
+    background: #2196F3;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    opacity: 0;
+}
+
+.tool-button.download-button:hover {
+    background: #1976D2;
+}
+
+/* Mobile toolbar download button */
+.compact-toolbar #download-btn {
+    visibility: visible !important;
+}
+
+/* Media query for mobile */
+@media (max-width: 640px), (max-device-width: 926px) {
+    #download-container {
+        display: none; /* Hide header download button on mobile */
+    }
+    
+    .compact-toolbar {
+        display: flex; /* Show mobile toolbar */
+    }
+} 

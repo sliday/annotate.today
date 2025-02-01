@@ -3,309 +3,27 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>annotate.today - Image Annotation Tool</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
     <script src="https://unpkg.com/headroom.js"></script>
-    
-    <!-- CSS Reset -->
-    <style>
-        /* Modern CSS Reset */
-        *, *::before, *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 
-                        "Liberation Mono", "Courier New", monospace;
-            line-height: 1.4;
-            color: #333;
-            background: #f5f5f5;    
-        }
-
-        button {
-            font: inherit;
-            border: none;
-            cursor: pointer;
-        }
-    </style>
-
-    <!-- App Styles -->
-    <style>
-        #image-container {
-            max-width: 100%;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-
-        #canvas-container {
-            position: relative;
-            width: 100%;
-            z-index: 1;
-            display: none;
-        }
-
-        /* Update header styles */
-        #header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 48px;
-            background: white;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            z-index: 1000;
-            font-size: 13px;
-        }
-
-        #site-url {
-            color: #666;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            flex: 1;
-            min-width: 100px;
-        }
-
-        #instructions {
-            flex: 2;
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            align-items: center;
-            color: #666;
-            font-size: 12px;
-        }
-
-        .instruction-step {
-            color: #2196F3;
-            font-weight: 500;
-            margin-right: 2px;
-        }
-
-        #download-container {
-            flex: 1;
-            display: flex;
-            justify-content: flex-end;
-            min-width: 100px;
-        }
-
-        /* Adjust main content to account for header */
-        #image-container {
-            padding-top: 48px; /* Same as header height */
-            margin: 0;
-        }
-
-        /* Update button style */
-        .tool-button {
-            background: #2196F3;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 13px;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.2s ease;
-        }
-
-        .tool-button.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        /* Clean instructions */
-        #instructions {
-            position: static;
-            transform: none;
-            background: none;
-            padding: 0;
-            box-shadow: none;
-            transition: none;
-        }
-
-        /* Tooltip */
-        .cursor-tooltip {
-            position: fixed;
-            background: rgba(33, 33, 33, 0.9);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 13px;
-            pointer-events: none;
-            z-index: 1001;
-            transform: translate(15px, 15px);
-            transition: opacity 0.2s ease;
-        }
-
-        /* Comment styling */
-        .comment-box {
-            background: #FFF176;
-            padding: 12px;
-            border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            font-size: 14px;
-            font-family: inherit;
-        }
-
-        footer {
-            text-align: center;
-            margin: 16px;
-            opacity: 0.5;
-            transition: opacity 0.2s ease;
-            font-size: 13px;
-        }
-
-        footer:hover {
-            opacity: 0.7;
-        }
-
-        footer .link {
-            color: inherit;
-            text-decoration: underline;
-        }
-
-        /* Add loading and error message styles */
-        .center-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            background: white;
-            padding: 20px;
-            border-radius: 6px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            z-index: 100;
-        }
-
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid #2196F3;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Hide elements initially */
-        #instructions, footer {
-            display: none;
-        }
-
-        /* Add modal styles after other styles */
-        .edu-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 24px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 1000;
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-        }
-
-        .edu-modal h2 {
-            font-size: 20px;
-            margin-bottom: 16px;
-            color: #333;
-        }
-
-        .edu-modal ul {
-            text-align: left;
-            margin: 16px 0;
-            padding-left: 24px;
-            color: #666;
-        }
-
-        .edu-modal li {
-            margin: 8px 0;
-        }
-
-        .edu-modal .close-btn {
-            background: #2196F3;
-            color: white;
-            padding: 8px 24px;
-            border-radius: 4px;
-            margin-top: 16px;
-            font-size: 14px;
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 999;
-        }
-
-        /* Mobile optimizations */
-        @media (max-width: 768px) {
-            #header {
-                padding: 0 12px;
-                height: 40px;  /* Slightly smaller header on mobile */
-            }
-
-            #site-url {
-                display: none;  /* Hide URL on mobile to save space */
-            }
-
-            #instructions {
-                flex: 1;
-                font-size: 11px;
-                gap: 12px;
-            }
-
-            .instruction-step {
-                display: none;  /* Hide step numbers on mobile */
-            }
-
-            #download-container {
-                min-width: auto;
-            }
-
-            .tool-button {
-                padding: 4px 10px;
-                font-size: 12px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
     <div id="header">
-        <div id="site-url"><b>annotate.today/?url=YOUR_IMAGE_URL</b></div>
-        <div id="instructions">
-            <span><span class="instruction-step">1</span> Double-click</span>
-            <span><span class="instruction-step">2</span> Add annotation</span>
-            <span><span class="instruction-step">3</span> Download</span>
+        <div id="site-url">
+            <b>annotate.today/?url=</b>
+            <input type="text" id="site-url-input" placeholder="Enter image URL" value="">
         </div>
         <div id="download-container">
-            <button class="tool-button" id="save-tool">Download</button>
+            <button class="tool-button download-button" id="save-tool" style="display: none;">Download</button>
         </div>
     </div>
 
     <div id="loading" class="center-message">
         <div class="loading-spinner"></div>
-        Loading image...
+        Loading...
     </div>
 
     <div id="error-message" class="center-message" style="display: none;">
@@ -321,7 +39,7 @@
         </div>
     </div>
 
-    <footer style="display: none;">
+    <footer style="display: none; opacity: 0;">
         Made with ❤ by <a href="https://x.com/stas_kulesh" class="link" target="_blank">@stas_kulesh</a> from <a
             href="https://karmabot.chat" class="link" target="_blank">Karma</a>
     </footer>
@@ -329,47 +47,57 @@
     <!-- Add modal HTML before the closing body tag -->
     <div id="modal-overlay" class="modal-overlay" style="display: none;"></div>
     <div id="edu-modal" class="edu-modal" style="display: none;">
-        <h2 id="modal-title">Welcome to annotate.today!</h2>
         <div id="modal-content">
-            <ul>
-                <li>Use annotate.today/?url=YOUR_IMAGE_URL</li>
-                <li>Double-click anywhere to add annotations</li>
-                <li>Download and share</li>
-            </ul>
+            <div class="modal-body">
+                <form id="modal-form">
+                    <input type="text" id="modal-url-input" placeholder="" class="modal-input" />
+                    <button type="submit" id="modal-load-btn" class="modal-btn" disabled>Load</button>
+                </form>
+            </div>
         </div>
-        <button class="close-btn" id="modal-close">Close</button>
+    </div>
+
+    <div class="compact-toolbar">
+        <button id="annotate-btn">
+            <svg viewBox="0 0 24 24">
+                <path fill="currentColor" d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
+            </svg>
+            Annotate
+        </button>
+        <button id="download-btn" style="display: none;">
+            <svg viewBox="0 0 24 24">
+                <path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
+            </svg>
+            Download
+        </button>
+        <button id="delete-btn" style="display: none;">
+            <svg viewBox="0 0 24 24">
+                <path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+            </svg>
+            Delete
+        </button>
     </div>
 
     <script>
+        // Add at the start of script
+        console.log('Screen width:', window.innerWidth);
+        console.log('Device width:', window.screen.width);
+        console.log('Viewport width:', document.documentElement.clientWidth);
+        console.log('Media query matches:', window.matchMedia('(max-width: 640px), (max-device-width: 926px)').matches);
+
         // Initialize variables at the start
-        const FALLBACK_IMAGE = 'https://annotate.today/new-landing-page-design.png';
+        const FALLBACK_IMAGE = `http://annotate.today/rickroll/${Math.floor(Math.random() * (183 - 2 + 1)) + 2}.jpg`;
         const PROXY_URLS = [
             'https://annotate.today/proxy?url=',  // main domain
         ];
         let currentProxyIndex = 0;
         let imageUrl;
 
-        // Get URL parameter and handle initial state
-        const rawUrl = new URLSearchParams(window.location.search).get('url');
-        if (rawUrl) {
-            imageUrl = encodeURI(decodeURI(rawUrl));
-        }
+        // Global variables for scaling
+        let originalImageWidth, originalImageHeight;
+        let currentScaleFactor = 1;
 
-        const loading = document.getElementById('loading');
-        const errorMessage = document.getElementById('error-message');
-        const instructions = document.getElementById('instructions');
-        const footer = document.querySelector('footer');
-
-        // Move footer inside body
-        document.body.appendChild(footer);
-
-        function showError(message) {
-            loading.style.display = 'none';
-            errorMessage.querySelector('p').textContent = message;
-            errorMessage.style.display = 'block';
-        }
-
-        // Initialize fabric canvas
+        // Initialize fabric canvas and image
         const canvas = new fabric.Canvas('canvas');
         const img = new Image();
 
@@ -381,363 +109,23 @@
             loadImage(FALLBACK_IMAGE);
         };
 
-        // Pre-load image to get dimensions
-        img.onload = function() {
-            console.log('Initial image loaded:', {
-                width: img.width,
-                height: img.height,
-                naturalWidth: img.naturalWidth,
-                naturalHeight: img.naturalHeight
-            });
+        // Get DOM elements first
+        const loading = document.getElementById('loading');
+        const errorMessage = document.getElementById('error-message');
+        const footer = document.querySelector('footer');
 
-            try {
-                // Scale image to fit window width
-                const maxWidth = window.innerWidth - 40;
-                const scale = maxWidth / img.width;
-                console.log('Calculated scale:', scale);
-                
-                // Verify canvas exists
-                if (!canvas || !canvas.getElement()) {
-                    throw new Error('Canvas not properly initialized');
-                }
-                
-                // Set canvas size first
-                canvas.setWidth(img.width * scale);
-                canvas.setHeight(img.height * scale);
-                console.log('Canvas size set:', {
-                    width: canvas.width,
-                    height: canvas.height
-                });
+        // Move footer inside body
+        document.body.appendChild(footer);
 
-                // Create fabric image with additional checks
-                fabric.Image.fromURL(imageUrl, function(fabricImg) {
-                    console.log('Fabric image created:', fabricImg ? 'success' : 'failed');
-                    
-                    if (!fabricImg) {
-                        showError('Failed to process image. Please try again.');
-                        return;
-                    }
-
-                    try {
-                        // Verify canvas still exists
-                        if (!canvas || !canvas.getElement()) {
-                            throw new Error('Canvas lost during image processing');
-                        }
-
-                        // Scale and set background
-                        fabricImg.scale(scale);
-                        console.log('Image scaled');
-
-                        // Use callback to ensure background is set
-                        canvas.setBackgroundImage(fabricImg, function() {
-                            console.log('Background image set');
-                            canvas.renderAll();
-                            console.log('Canvas rendered');
-
-                            // Only show UI elements if everything succeeded
-                            if (canvas && fabricImg && canvas.backgroundImage) {
-                                showUIElements();
-                                setCommentCursor();
-                                console.log('UI elements updated');
-                            } else {
-                                console.warn('Canvas state incomplete but continuing');
-                                // Still show UI if we got this far
-                                showUIElements();
-                                setCommentCursor();
-                            }
-                        });
-                    } catch (error) {
-                        console.error('Error in final setup:', error);
-                        // Don't show error if the app is still usable
-                        if (!canvas || !canvas.backgroundImage) {
-                            showError('Failed to prepare image. Please try again.');
-                        }
-                    }
-                }, { 
-                    crossOrigin: 'anonymous',
-                    // Add error handler for fabric image loading
-                    onError: function() {
-                        console.error('Fabric image load error');
-                        // Don't show error if the app is still usable
-                        if (!canvas || !canvas.backgroundImage) {
-                            showError('Failed to load image properly. Please try again.');
-                        }
-                    }
-                });
-
-            } catch (error) {
-                console.error('Error in canvas setup:', error);
-                // Don't show error if the app is still usable
-                if (!canvas || !canvas.getElement()) {
-                    showError('Failed to prepare canvas. Please try again.');
-                }
-            }
-        };
-
-        // Debug function
-        function logAction(action, details = {}) {
-            console.log(`Action: ${action}`, details);
+        // Get URL parameter and handle initial state
+        const rawUrl = new URLSearchParams(window.location.search).get('url');
+        if (rawUrl) {
+            imageUrl = encodeURI(decodeURI(rawUrl));
+            loadImage(imageUrl);
+        } else {
+            // Just load the fallback image directly without showing modal
+            loadImage(FALLBACK_IMAGE);
         }
-
-        // Track active tool
-        let activeTool = 'comment'; // Always comment mode
-
-        // Function to update toolbar visibility
-        function updateToolbarVisibility() {
-            const downloadButton = document.getElementById('save-tool');
-            const hasAnnotations = canvas.getObjects().length > 0;
-            
-            if (hasAnnotations) {
-                downloadButton.classList.add('visible');
-            } else {
-                downloadButton.classList.remove('visible');
-            }
-            logAction('Download button visibility updated', { visible: hasAnnotations });
-        }
-
-        // Add tooltip management
-        let mouseTimer = null;
-        let isTyping = false;
-
-        // Update cursor function to include tooltip
-        function setCommentCursor() {
-            const cursorEmoji = '💬';
-            
-            canvas.on('mouse:move', function(options) {
-                // Clear existing timer
-                if (mouseTimer) {
-                    clearTimeout(mouseTimer);
-                    mouseTimer = null;
-                }
-                
-                // Remove existing tooltip
-                removeTooltip();
-
-                // Check if mouse is over a comment
-                const target = options.target;
-                const isOverComment = target && target.type === 'textbox';
-                
-                // Remove old cursor
-                const oldCursor = document.querySelector('.custom-cursor');
-                if (oldCursor) oldCursor.remove();
-                
-                // Only show cursor if not over comment and not typing
-                if (!isOverComment && !isTyping) {
-                    const cursorHtml = `<div style="
-                        position: fixed; 
-                        left: ${options.e.clientX}px; 
-                        top: ${options.e.clientY}px; 
-                        transform: translate(-50%, -50%);
-                        pointer-events: none;
-                        font-size: 24px;
-                        z-index: 1000;
-                    ">${cursorEmoji}</div>`;
-                    
-                    const cursorElement = document.createElement('div');
-                    cursorElement.className = 'custom-cursor';
-                    cursorElement.innerHTML = cursorHtml;
-                    document.body.appendChild(cursorElement);
-                    
-                    canvas.defaultCursor = `${cursorEmoji}, auto`;
-                    canvas.hoverCursor = `${cursorEmoji}, auto`;
-
-                    // Set timer for tooltip
-                    mouseTimer = setTimeout(() => {
-                        if (!isTyping) {
-                            showTooltip(options.e.clientX, options.e.clientY);
-                        }
-                    }, 3000);
-                } else {
-                    canvas.defaultCursor = 'default';
-                    canvas.hoverCursor = 'move';
-                }
-            });
-        }
-
-        // Add tooltip functions
-        function showTooltip(x, y) {
-            removeTooltip();
-            const tooltip = document.createElement('div');
-            tooltip.className = 'cursor-tooltip';
-            tooltip.textContent = 'Double-click to annotate';
-            tooltip.style.left = `${x}px`;
-            tooltip.style.top = `${y}px`;
-            document.body.appendChild(tooltip);
-        }
-
-        function removeTooltip() {
-            const tooltip = document.querySelector('.cursor-tooltip');
-            if (tooltip) tooltip.remove();
-        }
-
-        // Update cursor removal to include tooltip
-        function removeCustomCursor() {
-            const cursor = document.querySelector('.custom-cursor');
-            if (cursor) cursor.remove();
-            removeTooltip();
-            if (mouseTimer) {
-                clearTimeout(mouseTimer);
-                mouseTimer = null;
-            }
-        }
-
-        // Track typing state
-        canvas.on('text:editing:entered', function() {
-            isTyping = true;
-            removeTooltip();
-        });
-
-        canvas.on('text:editing:exited', function() {
-            isTyping = false;
-        });
-
-        // Clean up when mouse leaves canvas
-        canvas.on('mouse:out', function() {
-            removeCustomCursor();
-            if (mouseTimer) {
-                clearTimeout(mouseTimer);
-                mouseTimer = null;
-            }
-        });
-
-        // Update canvas.on('mouse:dblclick') handler
-        canvas.on('mouse:dblclick', function(options) {
-            logAction('Canvas double-clicked', { 
-                tool: activeTool,
-                position: { x: options.e.offsetX, y: options.e.offsetY }
-            });
-
-            // Temporarily remove custom cursor while editing
-            removeCustomCursor();
-
-            if (activeTool === 'comment') {
-                const pointer = canvas.getPointer(options.e);
-                const comment = new fabric.Textbox('Add comment here...', {
-                    left: pointer.x,
-                    top: pointer.y,
-                    width: 200,
-                    fontSize: 14,
-                    fill: '#000000',
-                    backgroundColor: '#FFEB3B',
-                    padding: 10,
-                    cornerStyle: 'circle',
-                    cornerColor: '#666',
-                    cornerSize: 6,
-                    transparentCorners: false,
-                    lockScalingX: false,
-                    lockScalingY: true,
-                    hasControls: true,
-                    editingBorderColor: '#666',
-                    borderColor: '#666',
-                    borderOpacityWhenMoving: 1,
-                    selectable: true,
-                    fontFamily: 'Arial',
-                    hoverCursor: 'move', // Set cursor for when hovering over comment
-                });
-
-                canvas.add(comment);
-                canvas.setActiveObject(comment);
-                comment.enterEditing();
-                comment.selectAll();
-                logAction('Comment added', { position: pointer });
-                
-                // Show toolbar when first comment is added
-                updateToolbarVisibility();
-
-                // After comment is created, restore cursor
-                setCommentCursor();
-            }
-        });
-
-        // Restore cursor when entering canvas
-        canvas.on('mouse:over', function() {
-            setCommentCursor();
-        });
-
-        // Improve save functionality
-        document.getElementById('save-tool').addEventListener('click', async function() {
-            logAction('Save clicked');
-            try {
-                // Get the canvas data
-                const dataUrl = canvas.toDataURL({
-                    format: 'png',
-                    quality: 1,
-                    multiplier: 1
-                });
-                downloadImage(dataUrl);
-            } catch (error) {
-                console.error('Direct save failed:', error);
-                
-                // Fallback method: Use browser download
-                try {
-                    const link = document.createElement('a');
-                    link.download = 'annotated-image.png';
-                    link.href = imageUrl; // Use original image URL
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    
-                    alert('Note: Due to image source restrictions, annotations could not be included in the download. Consider using an image from a CORS-enabled source.');
-                } catch (downloadError) {
-                    console.error('Fallback save failed:', downloadError);
-                    alert('Unable to save image. Please try a different image source.');
-                }
-            }
-        });
-
-        // Helper function to download image
-        function downloadImage(dataUrl) {
-            const link = document.createElement('a');
-            link.download = 'annotated-image.png';
-            link.href = dataUrl;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // Make canvas responsive
-        window.addEventListener('resize', function() {
-            const maxWidth = window.innerWidth - 40;
-            const backgroundImage = canvas.backgroundImage;
-            if (backgroundImage) {
-                const scale = maxWidth / backgroundImage.width;
-                canvas.setWidth(backgroundImage.width * scale);
-                canvas.setHeight(backgroundImage.height * scale);
-                canvas.renderAll();
-            }
-        });
-
-        // Update the CSS to reflect double-click behavior
-        const canvasContainer = document.getElementById('canvas-container');
-        canvasContainer.title = 'Double-click to add annotation';
-
-        // Update delete handler to hide toolbar when last comment is removed
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Delete' || e.key === 'Backspace') {
-                const activeObject = canvas.getActiveObject();
-                if (activeObject) {
-                    logAction('Object deleted', { 
-                        type: activeObject.type,
-                        position: { x: activeObject.left, y: activeObject.top }
-                    });
-                    canvas.remove(activeObject);
-                    canvas.renderAll();
-                    
-                    // Hide toolbar if no comments left
-                    updateToolbarVisibility();
-                }
-            }
-        });
-
-        // Optional: Prevent backspace from navigating back in browser
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Backspace' && e.target === document.body) {
-                e.preventDefault();
-            }
-        });
-
-        // Initialize toolbar as hidden (since no comments at start)
-        updateToolbarVisibility();
 
         // Initialize Headroom
         const header = document.querySelector("#header");
@@ -752,39 +140,35 @@
         });
         headroom.init();
 
-        // Add styles for headroom transitions
-        const dynamicStyles = document.createElement('style');
-        dynamicStyles.textContent = `
-            .headroom {
-                transition: transform 200ms linear;
-            }
-            .headroom--pinned {
-                transform: translateY(0%);
-            }
-            .headroom--unpinned {
-                transform: translateY(-100%);
-            }
-
-            #canvas-container {
-                display: flex;
-                justify-content: center;
-                align-items: flex-start;
-                min-height: calc(100vh - 48px);
-                padding: 20px;
-                box-sizing: border-box;
-            }
-            
-            #canvas {
-                max-width: 100%;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            }
-        `;
-        document.head.appendChild(dynamicStyles);
-
         // Function to show UI elements
         function showUIElements() {
-            instructions.style.display = 'flex';
-            footer.style.display = 'block';
+            // Only show footer if we have a canvas with background image
+            if (canvas && canvas.backgroundImage) {
+                footer.style.display = 'block';
+                // Trigger reflow
+                footer.offsetHeight;
+                // Fade in
+                footer.style.opacity = '0.5';
+            }
+            
+            // Show toolbar on mobile
+            const toolbar = document.querySelector('.compact-toolbar');
+            if (window.innerWidth <= 926) {
+                toolbar.style.display = 'flex';
+                toolbar.style.opacity = '0';
+                
+                // Show annotate button
+                const annotateBtn = document.getElementById('annotate-btn');
+                annotateBtn.style.display = 'flex';
+            }
+            
+            // Trigger reflow
+            toolbar && toolbar.offsetHeight;
+            
+            // Fade in
+            if (window.innerWidth <= 926) {
+                toolbar.style.opacity = '1';
+            }
         }
 
         // Add error handling that doesn't block the UI
@@ -804,31 +188,78 @@
             
             if (type === 'error') {
                 modalContent.innerHTML = `
-                    <h3>Unable to load the image</h3>
-                    <p>Make sure that YOUR_IMG_URL is correct and the image is accessible.</p>
-                    <ul>
-                        <li>Use annotate.today/?url=YOUR_IMAGE_URL</li>
-                        <li>Double-click anywhere to add annotations</li>
-                        <li>Download and share</li>
-                    </ul>
-                `;
-            } else if (type === 'welcome') {
-                modalContent.innerHTML = `
-                    <h3>Welcome to annotate.today!</h3>
-                    <p>Use annotate.today/?url=YOUR_IMAGE_URL</p>
-                    <p>Double-click anywhere to add annotations</p>
-                    <p>Download and share</p>
+                    <div class="modal-body">
+                        <p class="modal-message">
+                            Unable to load the image<br>
+                            Make sure that YOUR_IMG_URL is correct and the image is accessible.<br><br>
+                            Use annotate.today/?url=YOUR_IMAGE_URL<br>
+                            Double-click anywhere to add annotations<br>
+                            Download and share
+                        </p>
+                        <form id="modal-form">
+                          <input type="text" id="modal-url-input" placeholder="" class="modal-input" />
+                          <button type="submit" id="modal-load-btn" class="modal-btn" disabled>Load</button>
+                        </form>
+                    </div>
                 `;
             }
             
             modal.style.display = 'block';
             overlay.style.display = 'block';
-        }
+            
+            if (type === 'error') {
+                // Focus the URL input field shortly after the modal is displayed
+                setTimeout(() => {
+                    document.getElementById('modal-url-input').focus();
+                }, 50);
+            }
+            
+            if (type === 'error') {
+                // Attach event handlers for the input field and form (for all devices)
+                setTimeout(() => {
+                    const modalForm = document.getElementById('modal-form');
+                    const urlInput    = document.getElementById('modal-url-input');
+                    const loadBtn     = document.getElementById('modal-load-btn');
+                    
+                    // Function to validate URL using the URL constructor
+                    function isValidURL(url) {
+                        try { 
+                            new URL(url); 
+                            return true; 
+                        } catch (e) { 
+                            return false; 
+                        }
+                    }
+                    
+                    // Check on input and enable/disable the Load button accordingly
+                    urlInput.addEventListener('input', () => {
+                        const trimmedVal = urlInput.value.trim();
+                        if (trimmedVal && isValidURL(trimmedVal)) {
+                            loadBtn.disabled = false;
+                        } else {
+                            loadBtn.disabled = true;
+                        }
+                    });
+                    
+                    // Handle form submission: Enter now submits the form
+                    modalForm.addEventListener('submit', (event) => {
+                        event.preventDefault();
+                        const url = urlInput.value.trim();
+                        if (url && isValidURL(url)) {
+                            imageUrl = encodeURI(decodeURI(url));
+                            // Update browser URL with new query parameter
+                            window.history.pushState(null, "", "?url=" + encodeURIComponent(url));
 
-        document.getElementById('modal-close').addEventListener('click', function() {
-            document.getElementById('edu-modal').style.display = 'none';
-            document.getElementById('modal-overlay').style.display = 'none';
-        });
+                            modal.style.display = 'none';
+                            overlay.style.display = 'none';
+                            loadImage(imageUrl);
+                        } else {
+                            alert('Please enter a valid URL');
+                        }
+                    });
+                }, 0);
+            }
+        }
 
         // Update loadImage function to handle proxy failures
         function loadImage(url) {
@@ -868,17 +299,17 @@
                 
                 img.onload = function() {
                     const windowWidth = window.innerWidth - 40;
-                    const windowHeight = window.innerHeight - 100;
+                    // Store original dimensions for use on resize events
+                    originalImageWidth = img.width;
+                    originalImageHeight = img.height;
+                    // Calculate initial scale factor based on the window width
+                    const scale = windowWidth / originalImageWidth;
+                    currentScaleFactor = scale;
                     
-                    let targetWidth = img.width;
-                    let targetHeight = img.height;
+                    const targetWidth = windowWidth;
+                    const targetHeight = originalImageHeight * scale;
                     
-                    // Scale image to fit window
-                    const scale = windowWidth / img.width;
-                    targetWidth = windowWidth;
-                    targetHeight = img.height * scale;
-                    
-                    // Set canvas size
+                    // Set canvas size based on scaled image dimensions
                     canvas.setWidth(targetWidth);
                     canvas.setHeight(targetHeight);
                     
@@ -901,59 +332,16 @@
             tryLoadImage();
         }
 
-        // Initial image load
-        if (imageUrl) {
-            loadImage(imageUrl);
-        } else {
-            loadImage(FALLBACK_IMAGE);
-        }
-
-        // Add proper resize handling
-        let resizeTimer;
-        window.addEventListener('resize', function() {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(function() {
-                const currentBg = canvas.backgroundImage;
-                if (currentBg) {
-                    // Store current objects and their relative positions
-                    const objects = canvas.getObjects();
-                    const objectsData = objects.map(obj => ({
-                        left: obj.left / canvas.width,
-                        top: obj.top / canvas.height,
-                        obj: obj
-                    }));
-                    
-                    // Calculate new dimensions
-                    const windowWidth = window.innerWidth - 40;
-                    const scale = windowWidth / currentBg.width;
-                    
-                    // Update canvas size
-                    canvas.setWidth(windowWidth);
-                    canvas.setHeight(currentBg.height * scale);
-                    
-                    // Scale background image
-                    currentBg.scale(scale);
-                    
-                    // Update object positions only, maintain original size
-                    objectsData.forEach(data => {
-                        const obj = data.obj;
-                        obj.set({
-                            left: data.left * canvas.width,
-                            top: data.top * canvas.height,
-                        });
-                    });
-                    
-                    // Render the changes
-                    canvas.renderAll();
-                }
-            }, 250); // Debounce resize events
-        });
-
         // Handle touch events for mobile
         let lastTap = 0;
         let touchTimer = null;
         
         canvas.on('touch:longpress', function(options) {
+            console.log('Long press detected', {
+                x: options.e.touches[0].clientX,
+                y: options.e.touches[0].clientY,
+                timestamp: new Date().getTime()
+            });
             // Prevent default behavior
             options.e.preventDefault();
             handleDoubleTapOrLongPress(options);
@@ -963,6 +351,14 @@
             const currentTime = new Date().getTime();
             const tapLength = currentTime - lastTap;
             
+            console.log('Tap detected', {
+                tapLength,
+                lastTap,
+                currentTime,
+                x: options.e.touches ? options.e.touches[0].clientX : options.e.clientX,
+                y: options.e.touches ? options.e.touches[0].clientY : options.e.clientY
+            });
+            
             // Clear any existing touch timer
             if (touchTimer) {
                 clearTimeout(touchTimer);
@@ -970,48 +366,29 @@
             
             if (tapLength < 500 && tapLength > 0) {
                 // Double tap detected
+                console.log('Double tap confirmed', {
+                    tapLength,
+                    x: options.e.touches ? options.e.touches[0].clientX : options.e.clientX,
+                    y: options.e.touches ? options.e.touches[0].clientY : options.e.clientY
+                });
                 handleDoubleTapOrLongPress(options);
                 lastTap = 0;
             } else {
                 // Set timer for potential second tap
                 lastTap = currentTime;
+                console.log('First tap recorded, waiting for second', {
+                    lastTap: currentTime
+                });
             }
         });
         
         function handleDoubleTapOrLongPress(options) {
-            const pointer = canvas.getPointer(options.e);
-            
-            // Create comment at touch point
-            const comment = new fabric.Textbox('Add comment here...', {
-                left: pointer.x,
-                top: pointer.y,
-                width: 200,
-                fontSize: 14,
-                fill: '#000000',
-                backgroundColor: '#FFEB3B',
-                padding: 10,
-                cornerStyle: 'circle',
-                cornerColor: '#666',
-                cornerSize: 6,
-                transparentCorners: false,
-                lockScalingX: false,
-                lockScalingY: true,
-                hasControls: true,
-                editingBorderColor: '#666',
-                borderColor: '#666',
-                borderOpacityWhenMoving: 1,
-                selectable: true,
-                fontFamily: 'Arial',
-                hoverCursor: 'move',
+            console.log('Handling tap/press event', {
+                type: options.e.type,
+                x: options.e.touches ? options.e.touches[0].clientX : options.e.clientX,
+                y: options.e.touches ? options.e.touches[0].clientY : options.e.clientY
             });
-            
-            canvas.add(comment);
-            canvas.setActiveObject(comment);
-            comment.enterEditing();
-            comment.selectAll();
-            
-            // Show toolbar when first comment is added
-            updateToolbarVisibility();
+            createComment(options);
         }
         
         // Update canvas options for better touch handling
@@ -1027,6 +404,385 @@
             const tapLength = currentTime - lastTap;
             if (tapLength < 500 && tapLength > 0) {
                 e.preventDefault();
+            }
+        });
+
+        // Add mobile toolbar handling
+        const annotateBtn = document.getElementById('annotate-btn');
+        const deleteBtn = document.getElementById('delete-btn');
+        
+        // Define createComment to add a textbox annotation at the double-click position
+        function createComment(options) {
+            // Get pointer coordinates from the double-click event
+            const pointer = canvas.getPointer(options.e);
+            console.log("Creating comment", {
+                canvasWidth: canvas.width,
+                canvasHeight: canvas.height,
+                pointer: pointer
+            });
+            // Create a new Fabric.js textbox for the annotation
+            const textbox = new fabric.Textbox('Enter comment', {
+                left: pointer.x,
+                top: pointer.y,
+                width: 200,  // adjust as needed
+                fontSize: 16,
+                borderColor: '#2196F3',
+                editingBorderColor: '#2196F3',
+                fill: '#333'
+            });
+            canvas.add(textbox);
+            canvas.setActiveObject(textbox);
+            canvas.renderAll();
+
+            // Update the download button visibility after adding the comment
+            updateToolbarVisibility();
+        }
+
+        annotateBtn.addEventListener('touchstart', function(e) {
+            console.log('Annotate button touched', {
+                event: e,
+                touches: e.touches,
+                canvasWidth: canvas.width,
+                canvasHeight: canvas.height,
+                viewport: canvas.viewportTransform
+            });
+            
+            // Prevent any default behavior
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Visual feedback
+            this.style.transform = 'scale(0.95)';
+        });
+        
+        annotateBtn.addEventListener('touchend', function(e) {
+            console.log('Annotate button touch ended');
+            
+            // Prevent any default behavior
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Reset visual feedback
+            this.style.transform = 'scale(1)';
+            
+            // Create comment
+            createComment();
+        });
+        
+        deleteBtn.addEventListener('touchstart', function(e) {
+            console.log('Delete button touched');
+            e.preventDefault();
+            this.style.transform = 'scale(0.95)';
+        });
+        
+        deleteBtn.addEventListener('touchend', function(e) {
+            console.log('Delete button touch ended');
+            e.preventDefault();
+            const activeObject = canvas.getActiveObject();
+            if (activeObject) {
+                canvas.remove(activeObject);
+                canvas.renderAll();
+                deleteBtn.style.transform = 'scale(1)';
+            }
+        });
+
+        // Update download button to use touch events
+        const downloadBtn = document.getElementById('download-btn');
+        downloadBtn.addEventListener('touchstart', function(e) {
+            console.log('Download button touched');
+            e.preventDefault();
+            this.style.transform = 'scale(0.95)';
+        });
+        
+        downloadBtn.addEventListener('touchend', function(e) {
+            console.log('Download button touch ended');
+            e.preventDefault();
+            const dataURL = canvas.toDataURL({
+                format: 'png',
+                quality: 1
+            });
+            
+            const link = document.createElement('a');
+            link.download = 'annotated-image.png';
+            link.href = dataURL;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            this.style.transform = 'scale(1)';
+        });
+
+        // Add touch handling for the canvas
+        canvas.on('mouse:down', function(options) {
+            console.log('Canvas mouse:down', {
+                pointer: canvas.getPointer(options.e),
+                touch: options.e.touches ? true : false
+            });
+        });
+
+        // Update object selection handling
+        canvas.on('object:selected', function(options) {
+            console.log('Object selected', {
+                type: options.target.type,
+                editing: options.target.isEditing
+            });
+            // Show delete button when object is selected
+            if (window.innerWidth <= 926) {
+                deleteBtn.classList.add('active');
+            }
+        });
+
+        canvas.on('selection:cleared', function() {
+            // Hide delete button when nothing is selected
+            if (window.innerWidth <= 926) {
+                deleteBtn.classList.remove('active');
+            }
+        });
+
+        // Also hide delete button when entering edit mode
+        canvas.on('text:editing:entered', function() {
+            if (window.innerWidth <= 926) {
+                deleteBtn.classList.remove('active');
+            }
+        });
+
+        // Add better touch control handling
+        canvas.on('touch:gesture', function(opt) {
+            if (opt.e.touches && opt.e.touches.length === 2) {
+                // Prevent default to allow our custom gesture handling
+                opt.e.preventDefault();
+            }
+        });
+
+        // New: Load image from query parameter "url" if present
+        window.addEventListener("load", function() {
+            const params = new URLSearchParams(window.location.search);
+            const imageUrl = params.get('url');
+            if (imageUrl) {
+                fabric.Image.fromURL(imageUrl, function(img) {
+                    // Option 1: Set as background image (scaled to fill canvas)
+                    canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+                        scaleX: canvas.width / img.width,
+                        scaleY: canvas.height / img.height
+                    });
+                    // Option 2: Alternatively, add the image directly to the canvas:
+                    // canvas.add(img);
+                    // canvas.centerObject(img);
+                    // canvas.renderAll();
+                }, { crossOrigin: 'anonymous' });
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const params = new URLSearchParams(window.location.search);
+            const urlParam = params.get('url') || '';
+            document.getElementById('site-url-input').value = urlParam;
+            
+            // Add handlers for the URL input
+            const urlInput = document.getElementById('site-url-input');
+            
+            urlInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const url = this.value.trim();
+                    if (url) {
+                        // Update URL and load image
+                        window.history.pushState(null, "", "?url=" + encodeURIComponent(url));
+                        imageUrl = encodeURI(decodeURI(url));
+                        loadImage(imageUrl);
+                    }
+                }
+            });
+            
+            // Optional: Add focus/blur effects like a browser address bar
+            urlInput.addEventListener('focus', function() {
+                this.select(); // Select all text when focused
+            });
+        });
+
+        // Function to set up the custom annotation cursor
+        function setCommentCursor() {
+            const cursorEmoji = '💬';
+            let mouseTimer = null;
+            let isTyping = false;
+
+            // Helper to remove tooltip if present
+            function removeTooltip() {
+                const tooltip = document.querySelector('.cursor-tooltip');
+                if (tooltip) tooltip.remove();
+            }
+
+            // Helper to remove custom cursor element
+            function removeCustomCursor() {
+                const cursor = document.querySelector('.custom-cursor');
+                if (cursor) cursor.remove();
+                removeTooltip();
+                if (mouseTimer) {
+                    clearTimeout(mouseTimer);
+                    mouseTimer = null;
+                }
+            }
+
+            // On mouse move over canvas, display custom cursor and set tooltip timer
+            canvas.on('mouse:move', function(options) {
+                // Clear previous tooltip timer
+                if (mouseTimer) {
+                    clearTimeout(mouseTimer);
+                    mouseTimer = null;
+                }
+                removeTooltip();
+
+                // Check if we're over an existing textbox (annotation)
+                const target = options.target;
+                const isOverComment = target && target.type === 'textbox';
+
+                // Remove any old cursor element
+                const oldCursor = document.querySelector('.custom-cursor');
+                if (oldCursor) oldCursor.remove();
+
+                // Only show the custom cursor when not editing text or over an annotation
+                if (!isOverComment && !isTyping) {
+                    // Create custom cursor element
+                    const cursorElement = document.createElement('div');
+                    cursorElement.className = 'custom-cursor';
+                    cursorElement.style.position = 'fixed';
+                    cursorElement.style.left = `${options.e.clientX}px`;
+                    cursorElement.style.top = `${options.e.clientY}px`;
+                    cursorElement.style.transform = 'translate(-50%, -50%)';
+                    cursorElement.style.pointerEvents = 'none';
+                    cursorElement.style.fontSize = '24px';
+                    cursorElement.style.zIndex = '1000';
+                    cursorElement.textContent = cursorEmoji;
+                    document.body.appendChild(cursorElement);
+
+                    // Update canvas cursors
+                    canvas.defaultCursor = `${cursorEmoji}, auto`;
+                    canvas.hoverCursor = `${cursorEmoji}, auto`;
+
+                    // Set a timer to display the tooltip after 3 seconds
+                    mouseTimer = setTimeout(() => {
+                        if (!isTyping) {
+                            const tooltip = document.createElement('div');
+                            tooltip.className = 'cursor-tooltip';
+                            tooltip.textContent = 'Double-click to annotate';
+                            tooltip.style.position = 'fixed';
+                            tooltip.style.left = `${options.e.clientX}px`;
+                            tooltip.style.top = `${options.e.clientY}px`;
+                            tooltip.style.zIndex = '1000';
+                            document.body.appendChild(tooltip);
+                        }
+                    }, 3000);
+                } else {
+                    canvas.defaultCursor = 'default';
+                    canvas.hoverCursor = 'move';
+                }
+            });
+
+            // Remove custom cursor when mouse leaves the canvas
+            canvas.on('mouse:out', function() {
+                removeCustomCursor();
+            });
+
+            // When entering text editing mode, disable the custom cursor
+            canvas.on('text:editing:entered', function() {
+                isTyping = true;
+                removeTooltip();
+            });
+
+            // Restore state after finishing text editing
+            canvas.on('text:editing:exited', function() {
+                isTyping = false;
+            });
+        }
+
+        // Add double-click listener on the canvas to create a comment/annotation
+        canvas.on('mouse:dblclick', function(options) {
+            console.log("Canvas double-clicked", options);
+            createComment(options);
+        });
+
+        // Add function to update the visibility of the Download buttons
+        function updateToolbarVisibility() {
+            // Selecting both download buttons: mobile and header
+            const downloadButtonToolbar = document.querySelector('.compact-toolbar #download-btn');
+            const downloadButtonHeader = document.getElementById('save-tool');
+            // Only count textboxes as annotations
+            const annotations = canvas.getObjects().filter(obj => obj.type === 'textbox');
+            const hasAnnotations = annotations.length > 0;
+            
+            if (hasAnnotations) {
+                downloadButtonToolbar.style.display = 'flex';
+                downloadButtonHeader.style.display = 'inline-block';
+                setTimeout(() => {
+                    downloadButtonToolbar.style.opacity = '1';
+                    downloadButtonHeader.style.opacity = '1';
+                }, 0);
+            } else {
+                downloadButtonToolbar.style.opacity = '0';
+                downloadButtonHeader.style.opacity = '0';
+                setTimeout(() => {
+                    downloadButtonToolbar.style.display = 'none';
+                    downloadButtonHeader.style.display = 'none';
+                }, 200);
+            }
+        }
+
+        // Add event listener for Download button to save canvas as an image
+        const headerDownloadButton = document.getElementById('save-tool');
+        const mobileDownloadButton = document.querySelector('.compact-toolbar #download-btn');
+        
+        function downloadCanvasImage() {
+            // Convert the Fabric canvas to a PNG data URL
+            const dataURL = canvas.toDataURL({
+                format: 'png',
+                quality: 1.0
+            });
+            // Create an invisible link and simulate a click to trigger download
+            const link = document.createElement('a');
+            link.href = dataURL;
+            link.download = 'annotated-image.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        headerDownloadButton.addEventListener('click', downloadCanvasImage);
+        if (mobileDownloadButton) {
+            mobileDownloadButton.addEventListener('click', downloadCanvasImage);
+        }
+
+        // Add event listener for window resize to preserve canvas aspect ratio and update annotations positions
+        window.addEventListener('resize', function() {
+            if (canvas && canvas.backgroundImage && originalImageWidth && originalImageHeight) {
+                const newWindowWidth = window.innerWidth - 40;
+                const newScale = newWindowWidth / originalImageWidth;
+                const newTargetWidth = newWindowWidth;
+                const newTargetHeight = originalImageHeight * newScale;
+
+                // Update canvas dimensions
+                canvas.setWidth(newTargetWidth);
+                canvas.setHeight(newTargetHeight);
+
+                // Update background image scaling accordingly
+                canvas.backgroundImage.scaleX = newScale;
+                canvas.backgroundImage.scaleY = newScale;
+
+                // Update positions and font sizes of annotation textboxes proportionally
+                canvas.getObjects().forEach(obj => {
+                    if (obj.type === 'textbox' && obj !== canvas.backgroundImage) {
+                        // Recalculate position relative to the new scale factor
+                        obj.left = obj.left * (newScale / currentScaleFactor);
+                        obj.top = obj.top * (newScale / currentScaleFactor);
+                        // Optionally update font size
+                        if (obj.fontSize) {
+                            obj.fontSize = obj.fontSize * (newScale / currentScaleFactor);
+                        }
+                        obj.setCoords();
+                    }
+                });
+
+                canvas.requestRenderAll();
+                // Update the global scale factor for future calculations
+                currentScaleFactor = newScale;
             }
         });
     </script>

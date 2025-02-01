@@ -1,0 +1,27 @@
+# macOS
+.DS_Store
+
+# Node modules (if applicable)
+node_modules/
+
+# Logs
+*.log
+
+# Optional: Build output
+/dist
+/build
+
+# IDE or Editor directories and files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Operating System files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Other local files
+*.tmp
+*.swp 
