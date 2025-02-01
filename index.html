@@ -18,6 +18,7 @@
         </div>
         <div id="download-container">
             <button class="tool-button download-button" id="save-tool" style="display: none;">Download</button>
+            <button id="how-it-works-btn" class="download-button">How it works</button>
         </div>
     </div>
 
@@ -123,7 +124,8 @@
             imageUrl = encodeURI(decodeURI(rawUrl));
             loadImage(imageUrl);
         } else {
-            // Just load the fallback image directly without showing modal
+            // No URL provided – set imageUrl to the fallback image and load it.
+            imageUrl = FALLBACK_IMAGE;
             loadImage(FALLBACK_IMAGE);
         }
 
@@ -322,6 +324,7 @@
                             loading.style.display = 'none';
                             showUIElements();
                             setCommentCursor();
+                            updateToolbarVisibility();
                         });
                     }, { crossOrigin: 'anonymous' });
                 };
@@ -413,22 +416,24 @@
         
         // Define createComment to add a textbox annotation at the double-click position
         function createComment(options) {
-            // Get pointer coordinates from the double-click event
+            // Get pointer coordinates from the double-click event (or touch event)
             const pointer = canvas.getPointer(options.e);
             console.log("Creating comment", {
                 canvasWidth: canvas.width,
                 canvasHeight: canvas.height,
                 pointer: pointer
             });
-            // Create a new Fabric.js textbox for the annotation
+            // Create a new Fabric.js textbox for the annotation with a 70% yellow background
             const textbox = new fabric.Textbox('Enter comment', {
                 left: pointer.x,
                 top: pointer.y,
                 width: 200,  // adjust as needed
                 fontSize: 16,
+                fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
                 borderColor: '#2196F3',
                 editingBorderColor: '#2196F3',
-                fill: '#333'
+                fill: '#333',
+                backgroundColor: 'rgba(255, 235, 59, 0.7)'  // 70% yellow background
             });
             canvas.add(textbox);
             canvas.setActiveObject(textbox);
@@ -710,13 +715,22 @@
             const hasAnnotations = annotations.length > 0;
             
             if (hasAnnotations) {
+                // If annotations exist then show Download buttons and hide "How it works"
                 downloadButtonToolbar.style.display = 'flex';
                 downloadButtonHeader.style.display = 'inline-block';
+                document.getElementById('how-it-works-btn').style.display = 'none';
                 setTimeout(() => {
                     downloadButtonToolbar.style.opacity = '1';
                     downloadButtonHeader.style.opacity = '1';
                 }, 0);
             } else {
+                // No annotations – if we are with fallback image, show "How it works"
+                if (imageUrl === FALLBACK_IMAGE) {
+                    document.getElementById('how-it-works-btn').style.display = 'inline-block';
+                } else {
+                    document.getElementById('how-it-works-btn').style.display = 'none';
+                }
+                // Hide download buttons
                 downloadButtonToolbar.style.opacity = '0';
                 downloadButtonHeader.style.opacity = '0';
                 setTimeout(() => {
@@ -785,6 +799,63 @@
                 currentScaleFactor = newScale;
             }
         });
+
+        // Listen for the Delete (or Backspace) key to remove selected annotation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                const activeObj = canvas.getActiveObject();
+                if (activeObj && activeObj.type === 'textbox') {
+                    canvas.remove(activeObj);
+                    canvas.discardActiveObject();
+                    canvas.requestRenderAll();
+                    updateToolbarVisibility();
+                }
+            }
+        });
+
+        // Set up "How it works" button event listeners after DOM is fully loaded
+        window.addEventListener('load', function() {
+            const howItWorksBtn = document.getElementById('how-it-works-btn');
+            const videoModal = document.getElementById('video-modal');
+            const videoClose = document.getElementById('video-close');
+
+            if (howItWorksBtn && videoModal && videoClose) {
+                howItWorksBtn.addEventListener('click', function() {
+                    videoModal.style.display = 'block';
+                });
+
+                videoClose.addEventListener('click', function() {
+                    videoModal.style.display = 'none';
+                    // Pause and reset video
+                    const tutorialVideo = document.getElementById('tutorial-video');
+                    tutorialVideo.pause();
+                    tutorialVideo.currentTime = 0;
+                });
+
+                // Also close modal if clicking outside the video content
+                window.addEventListener('click', function(e) {
+                    if (e.target === videoModal) {
+                        videoModal.style.display = 'none';
+                        const tutorialVideo = document.getElementById('tutorial-video');
+                        tutorialVideo.pause();
+                        tutorialVideo.currentTime = 0;
+                    }
+                });
+            }
+        });
     </script>
+
+    <!-- Video Modal for "How it works" -->
+    <div id="video-modal" class="video-modal" style="display: none;">
+        <div class="video-content">
+            <div class="video-wrapper">
+                <span id="video-close" class="video-close">&times;</span>
+                <video id="tutorial-video" controls autoplay>
+                    <source src="annotate.today.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

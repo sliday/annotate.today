@@ -532,7 +532,7 @@ footer .link {
 }
 
 /* Download button styles */
-.tool-button.download-button {
+.download-button {
     visibility: visible !important; /* Override the default .tool-button visibility */
     background: #2196F3;
     color: white;
@@ -542,7 +542,10 @@ footer .link {
     cursor: pointer;
     font-weight: bold;
     transition: all 0.2s ease;
-    opacity: 0;
+}
+
+.tool-button.download-button {
+    visibility: visible !important;
 }
 
 .tool-button.download-button:hover {
@@ -563,4 +566,68 @@ footer .link {
     .compact-toolbar {
         display: flex; /* Show mobile toolbar */
     }
-} 
+}
+
+/* Video Modal Styles */
+.video-modal {
+    position: fixed;
+    z-index: 1006;  /* Above other elements */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.video-content {
+    position: relative;
+    width: 80%;
+    max-width: 800px;
+    background: #fff;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+    margin: auto;  /* Center in the modal */
+}
+
+.video-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-height: 80vh;
+}
+
+.video-content video {
+    width: 100%;
+    height: auto;
+    max-height: calc(80vh - 80px);
+    border-radius: 4px;
+    object-fit: contain;
+}
+
+.video-close {
+    position: absolute;
+    top: -16px;
+    right: -16px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #666;
+    background: #fff;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 1007;  /* Ensure it's above the video */
+}
+
+.video-close:hover {
+    color: #333;
+}
